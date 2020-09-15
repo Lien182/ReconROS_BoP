@@ -57,7 +57,7 @@ THREAD_ENTRY() {
 	uint32 stack_addr[1];
 	uint32 threadid[1];
 	uint32 rc_flag[1];
-	
+		
 
 	{
 		#pragma HLS PROTOCOL fixed
