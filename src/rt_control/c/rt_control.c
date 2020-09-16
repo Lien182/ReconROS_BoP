@@ -14,7 +14,7 @@
 //Debug optioons
 //For tests, the motors can be turned off
 #define MOTOR_ON 1
-#define DIRECTAXIACCESS 1
+#define DIRECTAXIACCESS 0
 #define DEBUG_OUTPUT_KALMAN 0
 #define FILE_LOG 0
 
@@ -191,13 +191,11 @@ THREAD_ENTRY() {
 		volatile uint32_t pos;
 
 #if DIRECTAXIACCESS == 0
-		switch(rb_info->demo_nr)
-		{
-			case 0: pos = MBOX_GET(touch_0_pos); break;
-			case 1: pos = MBOX_GET(touch_1_pos); break;
-			case 2: pos = MBOX_GET(touch_2_pos); break;
-			default: printf("ERROR: Wrong demonstrator number!!\n");return; break;
-		}
+
+		ROS_SUBSCRIBE_TAKE(control_0_subdata, control_0_position_msg);
+
+		pos = (control_0_position_msg->y & 0x00fff) | ((control_0_position_msg->x & 0x00fff ) << 12);
+
 		
 #else
 		cycle_timer_wait(&cycle_timer);	
@@ -327,14 +325,15 @@ else
 		printf("y_1 %4.3f\t,y_2 %4.3f\t,x_1 %4.3f\t,x_2 %4.3f\t,v_1 %4.3f\t,v_2 %4.3f\t,e_1 %4.3f\t,e_2 %4.3f\t,u_1 %4.3f\t,u_2 %4.3f\n", y[0], y[1], x[0], x[2], x[1], x[3], e[0], e[1], u[0], u[1]);
 #endif
 
-		switch(rb_info->demo_nr)
+		for (i = 0; i < 6; i++)
 		{
-			case 0: for (i = 0; i < 6; i++) MBOX_PUT(inverse_0_cmd, ((cmd_x << 17) | (cmd_y << 3) | (i << 0))); break;
-			case 1: for (i = 0; i < 6; i++) MBOX_PUT(inverse_1_cmd, ((cmd_x << 17) | (cmd_y << 3) | (i << 0))); break; 
-			case 2: for (i = 0; i < 6; i++) MBOX_PUT(inverse_2_cmd, ((cmd_x << 17) | (cmd_y << 3) | (i << 0))); break; 
-			default: return; break;
-		}
+			control_0_rotation_msg->cmd_x = cmd_x;
+			control_0_rotation_msg->cmd_y = cmd_y;
+			control_0_rotation_msg->leg = i;
 
+			ROS_PUBLISH(control_0_pubdata, control_0_rotation_msg);
+
+		}
 
 	}
 }

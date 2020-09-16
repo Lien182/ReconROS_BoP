@@ -17,7 +17,7 @@
 #include <float.h>
 
 
-#define DIRECTAXIACCESS 1
+#define DIRECTAXIACCESS 0
 #define DEBUG 0
 #define DEBUG_LIGHT 0
 
@@ -78,18 +78,12 @@ THREAD_ENTRY() {
 	printf("Inverse Thread for demonstrator %d \n", rb_info->demo_nr);
 
 	while (1) {
-		uint32_t data;
+				
+		ROS_SUBSCRIBE_TAKE(inverse_0_subdata, inverse_0_rotation_msg);
 
-		switch(rb_info->demo_nr)
-		{
-			case 0: data = MBOX_GET(inverse_0_cmd); break;
-			case 1: data = MBOX_GET(inverse_1_cmd); break;
-			case 2: data = MBOX_GET(inverse_2_cmd); break;
-			default: printf("ERROR: Wrong demonstrator number!!\n");return; break;
-		}
 
-		float t_p2b_alpha = fitofl((data >> 17) & 0x3fff, 14, 6);
-		float t_p2b_beta  = fitofl((data >> 3) & 0x3fff, 14, 6);
+		float t_p2b_alpha = fitofl((inverse_0_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
+		float t_p2b_beta  = fitofl((inverse_0_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
 #if (DEBUG == 1) || (DEBUG_LIGHT == 1)
 		printf("[Inverse] alpha %f, beta %f \n", t_p2b_alpha, t_p2b_beta);
 #endif
@@ -101,7 +95,7 @@ THREAD_ENTRY() {
 		printf("[Inverse] t_p2b_alpha_sin %f, t_p2b_alpha_cos %f, t_p2b_beta_sin %f, t_p2b_beta_cos %f \n", t_p2b_alpha_sin, t_p2b_alpha_cos, t_p2b_beta_sin, t_p2b_beta_cos);
 #endif
 
-		int leg = (data >> 0) & 0x7;
+		int leg = (inverse_0_rotation_msg->leg >> 0) & 0x7;
 
 		float p_b_j_x, p_b_j_y, p_b_j_z;
 		float p_s_j_x, p_s_j_y, p_s_j_z;
@@ -168,13 +162,11 @@ THREAD_ENTRY() {
 #if DIRECTAXIACCESS == 1
 	((uint32_t*)(rb_info->pServo))[leg] = v_s_aj_l_mina;
 #else
-	switch(rb_info->demo_nr)
-		{
-			case 0: MBOX_PUT(servo_0_cmd, ((v_s_aj_l_mina << 21) | (leg << 18) | 0)); break;
-			case 1: MBOX_PUT(servo_1_cmd, ((v_s_aj_l_mina << 21) | (leg << 18) | 0)); break;
-			case 2: MBOX_PUT(servo_2_cmd, ((v_s_aj_l_mina << 21) | (leg << 18) | 0)); break;
-			default: break;
-		}
+
+	inverse_0_legangle_msg->angle = v_s_aj_l_mina;
+	inverse_0_legangle_msg->leg = leg;
+
+	ROS_PUBLISH(inverse_0_pubdata, inverse_0_legangle_msg);
 #endif
 	}
 }

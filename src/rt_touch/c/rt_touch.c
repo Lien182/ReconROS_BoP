@@ -53,11 +53,10 @@ THREAD_ENTRY() {
 		//printf("[rt_touch] x_pos %08x, y_pos %08x \n", x_pos, y_pos);
 #endif
 
-		switch(rb_info->demo_nr)
-		{
-			case 0: mbox_put(touch_0_pos, 0 | ((x_pos & 0xfff) << 12) | ((y_pos & 0xfff) << 0)); break;
-			case 1: mbox_put(touch_1_pos, 0 | ((x_pos & 0xfff) << 12) | ((y_pos & 0xfff) << 0)); break;
-			case 2: mbox_put(touch_2_pos, 0 | ((x_pos & 0xfff) << 12) | ((y_pos & 0xfff) << 0)); break;
-		}
+		touch_0_position_msg->x = x_pos;
+		touch_0_position_msg->y = y_pos;
+		
+		ROS_PUBLISH(touch_0_pubdata, touch_0_position_msg);
+
 	}
 }

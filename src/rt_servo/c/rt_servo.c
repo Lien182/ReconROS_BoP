@@ -28,17 +28,14 @@ THREAD_ENTRY() {
 	rb_info = (struct recobop_info*)rt->init_data;
 
 	while (1) {
-		
-		switch(rb_info->demo_nr)
-		{
-			case 0: cmd = mbox_get(servo_0_cmd); break;
-			case 1: cmd = mbox_get(servo_1_cmd); break;
-			case 2: cmd = mbox_get(servo_2_cmd); break;
-		}
+
+		ROS_SUBSCRIBE_TAKE(servo_0_subdata, servo_0_legangle_msg);
+
+
 #if DEBUG == 1
 		printf("[rt_servo %d] Got new data from inverse\n",rb_info->demo_nr);
 #endif
-		((uint32_t*)(rb_info->pServo))[(cmd >> 18) & 7] = cmd >> 21;
+		((uint32_t*)(rb_info->pServo))[(servo_0_legangle_msg->leg) & 7] = servo_0_legangle_msg->angle;
 
 
 	}
