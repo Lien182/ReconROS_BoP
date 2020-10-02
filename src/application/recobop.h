@@ -102,7 +102,30 @@
 
 	t_a9timer * a9timer;
 	t_cycle_timer cycle_timer;
+
+	t_a9timer_capture a9cap_touch_start;
+	t_a9timer_capture a9cap_touch_end;
+	t_a9timer_capture a9cap_control_start;
+	t_a9timer_capture a9cap_control_end;
+	t_a9timer_capture a9cap_inverse_start;
+	t_a9timer_capture a9cap_inverse_end;
+	t_a9timer_capture a9cap_servo_start;
+	
+	
+	t_a9timer_capture a9cap_cycle_time;
+
 #else
 	extern t_a9timer * a9timer;
 	extern t_cycletimer cycle_timer;
+
+
+	extern t_a9timer_capture a9cap_touch_start;
+	extern t_a9timer_capture a9cap_touch_end;
+	extern t_a9timer_capture a9cap_control_start;
+	extern t_a9timer_capture a9cap_control_end;
+	extern t_a9timer_capture a9cap_inverse_start;
+	extern t_a9timer_capture a9cap_inverse_end;
+	extern t_a9timer_capture a9cap_servo_start;
+	extern t_a9timer_capture a9cap_servo_end;
+
 #endif /* RECOBOP_H */

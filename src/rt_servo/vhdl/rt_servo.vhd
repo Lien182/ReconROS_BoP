@@ -192,7 +192,7 @@ begin
                     end if;
 				
 				when STATE_SEND_RC_REQUEST => 
-					osif_mbox_put(i_osif, o_osif, std_logic_vector(RECONFIGURATION_2_REQUEST), x"00000001", ignore, done);
+					osif_mbox_put(i_osif, o_osif, x"00000000", x"00000001", ignore, done);
 					if done then
 						state <= STATE_EXIT;
 					end if;

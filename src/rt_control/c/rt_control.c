@@ -8,8 +8,8 @@
 #include <stdio.h>
 
 //Mode: Cycle or constant Position
-#define REFERENCE_CYCLE 1
-#define REFERENCE_CONST 0
+#define REFERENCE_CYCLE 0
+#define REFERENCE_CONST 1
 
 //Debug optioons
 //For tests, the motors can be turned off
@@ -18,6 +18,7 @@
 #define DEBUG_OUTPUT_KALMAN 0
 #define FILE_LOG 0
 
+#define ROS
 
 //Konstants
 #define KP -0.0004f
@@ -193,12 +194,18 @@ THREAD_ENTRY() {
 #if DIRECTAXIACCESS == 0
 
 		ROS_SUBSCRIBE_TAKE(control_0_subdata, control_0_position_msg);
+		printf("[rt_control] ");
+		a9timer_capture(a9timer, &a9cap_control_start, A9TIMER_CAPTURE_STOP);
 
 		pos = (control_0_position_msg->y & 0x00fff) | ((control_0_position_msg->x & 0x00fff ) << 12);
 
 		
+
+		
 #else
 		cycle_timer_wait(&cycle_timer);	
+		printf("[rt_control] ");
+		a9timer_capture(a9timer, &a9cap_control_start, A9TIMER_CAPTURE_STOP);
 		pos = (((uint32_t*)rb_info->pTouch)[1] & 0x00fff) | (((uint32_t*)rb_info->pTouch)[0] & 0x00fff )<< 12;
 #endif
 
@@ -243,8 +250,7 @@ else
 #endif
 
 
-
-
+		//printf("[rt_control] x_pos %08x, y_pos %08x \n", p_p_b_x, p_p_b_y);
 
 		y[0] = (float)p_p_b_x * 116.67e-3 ;
 		y[1] = (float)p_p_b_y * 116.67e-3 ;
@@ -325,15 +331,27 @@ else
 		printf("y_1 %4.3f\t,y_2 %4.3f\t,x_1 %4.3f\t,x_2 %4.3f\t,v_1 %4.3f\t,v_2 %4.3f\t,e_1 %4.3f\t,e_2 %4.3f\t,u_1 %4.3f\t,u_2 %4.3f\n", y[0], y[1], x[0], x[2], x[1], x[3], e[0], e[1], u[0], u[1]);
 #endif
 
+
+#ifdef ROS
+
 		for (i = 0; i < 6; i++)
 		{
 			control_0_rotation_msg->cmd_x = cmd_x;
 			control_0_rotation_msg->cmd_y = cmd_y;
 			control_0_rotation_msg->leg = i;
-
+			if(i == 5)
+			{
+				printf("[rt_control] ");
+				a9timer_capture(a9timer, &a9cap_control_end, A9TIMER_CAPTURE_STOP);
+			}
+				
 			ROS_PUBLISH(control_0_pubdata, control_0_rotation_msg);
-
 		}
+		
+
+#else
+		for (i = 0; i < 6; i++) MBOX_PUT(legacy_0_inverse_0_cmd, ((cmd_x << 17) | (cmd_y << 3) | (i << 0)));
+#endif	
 
 	}
 }

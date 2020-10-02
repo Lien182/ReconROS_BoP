@@ -37,6 +37,7 @@ typedef struct
 
 t_a9timer * a9timer_init( void );
 uint32_t    a9timer_getvalue(t_a9timer * a9timer );
-void        a9timer_caputure(t_a9timer * a9timer, t_a9timer_capture * capture, uint32_t mode );
+void        a9timer_capture(t_a9timer * a9timer, t_a9timer_capture * capture, uint32_t mode );
+void 	    a9capture_printf(t_a9timer_capture * capture);
 
 #endif

@@ -15,7 +15,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 THREAD_ENTRY() {
 	struct recobop_info *rb_info;
@@ -30,7 +30,15 @@ THREAD_ENTRY() {
 	while (1) {
 
 		ROS_SUBSCRIBE_TAKE(servo_0_subdata, servo_0_legangle_msg);
+		
+		//if(servo_0_legangle_msg->leg  == 0)
+		{
+			printf("[rt_servo] ");
+			a9timer_capture(a9timer, &a9cap_servo_start, A9TIMER_CAPTURE_STOP);
+		}
+			
 
+		
 
 #if DEBUG == 1
 		printf("[rt_servo %d] Got new data from inverse\n",rb_info->demo_nr);

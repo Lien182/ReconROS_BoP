@@ -15,7 +15,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 THREAD_ENTRY() {
 	struct recobop_info *rb_info;
@@ -39,12 +39,18 @@ THREAD_ENTRY() {
 		
 		cycle_timer_wait(&cycle_timer);
 
+		printf("[rt_touch] ");
+		a9timer_capture(a9timer, &a9cap_touch_start, A9TIMER_CAPTURE_STOP);
+		
+
 #if DEBUG == 0
 
 		x_pos = ((int32_t*)rb_info->pTouch)[0] & 0x0fff;	
 		if(x_pos & 0x0800) x_pos |= 0xfffff000;
 		y_pos = ((int32_t*)rb_info->pTouch)[1] & 0x0fff;
 		if(y_pos & 0x0800) y_pos |= 0xfffff000;
+
+		//printf("[rt_touch] x_pos %08x, y_pos %08x \n", x_pos, y_pos);
 
 #else
 		x_pos = (int32_t)(200 * cos(dd));
@@ -56,6 +62,8 @@ THREAD_ENTRY() {
 		touch_0_position_msg->x = x_pos;
 		touch_0_position_msg->y = y_pos;
 		
+		printf("[rt_touch] ");
+		a9timer_capture(a9timer, &a9cap_touch_end, A9TIMER_CAPTURE_STOP);
 		ROS_PUBLISH(touch_0_pubdata, touch_0_position_msg);
 
 	}

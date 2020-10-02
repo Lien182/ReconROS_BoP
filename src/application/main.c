@@ -69,8 +69,9 @@ int main(int argc, char **argv) {
 		printf("HDMI Output: Init error \n");
 	}
 
-	a9timer = a9timer_init();
 	*/
+
+	a9timer = a9timer_init();
 
 	rb_info[0].timerregister = &(a9timer->TMR_CNT_REG_L);
 	rb_info[0].rc_flag_control = 0UL;
@@ -84,39 +85,13 @@ int main(int argc, char **argv) {
 	rb_info[0].threadid_inverse = 3;
 	rb_info[0].rc_flag_touch = 0UL;
 	rb_info[0].rc_flag_servo = 0UL;
-	
-	rb_info[1].timerregister = &(a9timer->TMR_CNT_REG_L);
-	rb_info[1].rc_flag_control = 0UL;
-	rb_info[1].rc_flag_inverse = 0UL;
-	rb_info[1].pServo = (uint32_t*)axi_servo_init(BOP_1_SERVO_BASE_ADDR);
-	rb_info[1].pTouch = (uint32_t*)axi_touch_init(BOP_1_TOUCH_BASE_ADDR);
-	rb_info[1].demo_nr = 1UL;
-	rb_info[1].stackaddr_control = (uint32_t*)malloc(50 * sizeof(uint32_t));
-	rb_info[1].threadid_control = 1;
-	rb_info[1].stackaddr_inverse = (uint32_t*)malloc(50 * sizeof(uint32_t));
-	rb_info[1].threadid_inverse = 4;
-	rb_info[1].rc_flag_touch = 0UL;
-	rb_info[1].rc_flag_servo = 0UL;
-
-	rb_info[2].timerregister = &(a9timer->TMR_CNT_REG_L);
-	rb_info[2].rc_flag_control = 0UL;
-	rb_info[2].rc_flag_inverse = 0UL;
-	rb_info[2].pServo = (uint32_t*)axi_servo_init(BOP_2_SERVO_BASE_ADDR);
-	rb_info[2].pTouch = (uint32_t*)axi_touch_init(BOP_2_TOUCH_BASE_ADDR);
-	rb_info[2].demo_nr = 2UL;
-	rb_info[2].stackaddr_control = (uint32_t*)malloc(50 * sizeof(uint32_t));
-	rb_info[2].threadid_control = 2;
-	rb_info[2].stackaddr_inverse = (uint32_t*)malloc(50 * sizeof(uint32_t));
-	rb_info[2].threadid_inverse = 5;
-	rb_info[2].rc_flag_touch = 0UL;
-	rb_info[2].rc_flag_servo = 0UL;
 
 
 	signal(SIGINT, exit_signal);
 	signal(SIGTERM, exit_signal);
 	signal(SIGABRT, exit_signal);	
 	
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 1; i++)
 	{
 		printf("Init Data on %x \n", (uint32_t)&(rb_info[i]));
 		printf("Servo %x, Touch %x \n", (uint32_t)rb_info[i].pServo, (uint32_t)rb_info[i].pTouch);

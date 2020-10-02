@@ -38,10 +38,20 @@ uint32_t a9timer_getvalue(t_a9timer * a9timer)
     return a9timer->TMR_CNT_REG_L;
 }
 
-void     a9timer_caputure(t_a9timer * a9timer, t_a9timer_capture * capture, uint32_t mode )
+void     a9timer_capture(t_a9timer * a9timer, t_a9timer_capture * capture, uint32_t mode )
 {
     if(mode == A9TIMER_CAPTURE_START)
         capture->tStart = a9timer_getvalue(a9timer);
     else
-        capture->tStop  = a9timer_getvalue(a9timer);
+	{
+		capture->tStop  = a9timer_getvalue(a9timer);
+		a9capture_printf(capture);
+	}
+        
 };
+
+
+void 	a9capture_printf(t_a9timer_capture * capture)
+{
+	printf("%6.6f ms\n", (double)(capture->tStop - capture->tStart)* 0.00000333);
+}

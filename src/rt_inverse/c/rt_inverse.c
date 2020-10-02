@@ -21,6 +21,9 @@
 #define DEBUG 0
 #define DEBUG_LIGHT 0
 
+
+#define ROS 
+
 // definitions of stewart platform
 
 // coordinates of platform joints in base coordinates
@@ -78,12 +81,42 @@ THREAD_ENTRY() {
 	printf("Inverse Thread for demonstrator %d \n", rb_info->demo_nr);
 
 	while (1) {
-				
+
+
+#ifdef ROS				
 		ROS_SUBSCRIBE_TAKE(inverse_0_subdata, inverse_0_rotation_msg);
-
-
+		
+		//if(inverse_0_rotation_msg->leg  == 0)
+		{
+			printf("[rt_inverse] "); 
+			a9timer_capture(a9timer, &a9cap_inverse_start, A9TIMER_CAPTURE_STOP); 
+		}
 		float t_p2b_alpha = fitofl((inverse_0_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
 		float t_p2b_beta  = fitofl((inverse_0_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
+		int leg = inverse_0_rotation_msg->leg & 0x7;
+
+
+		/*
+		uint32_t data = MBOX_GET(legacy_0_inverse_0_cmd);
+
+		float t_p2b_alpha_tmp = fitofl((data >> 17) & 0x3fff, 14, 6);
+		float t_p2b_beta_tmp  = fitofl((data >> 3) & 0x3fff, 14, 6);
+		int leg_tmp = (data >> 0) & 0x7;		
+		
+		printf("a: %f %f, b: %f %f, leg: %d %d \n", t_p2b_alpha, t_p2b_alpha_tmp, t_p2b_beta, t_p2b_beta_tmp, leg, leg_tmp );
+		*/
+
+#else
+		uint32_t data;
+		data = MBOX_GET(legacy_0_inverse_0_cmd);
+
+		float t_p2b_alpha = fitofl((data >> 17) & 0x3fff, 14, 6);
+		float t_p2b_beta  = fitofl((data >> 3) & 0x3fff, 14, 6);
+		int leg = (data >> 0) & 0x7;		
+#endif
+		
+
+
 #if (DEBUG == 1) || (DEBUG_LIGHT == 1)
 		printf("[Inverse] alpha %f, beta %f \n", t_p2b_alpha, t_p2b_beta);
 #endif
@@ -95,7 +128,7 @@ THREAD_ENTRY() {
 		printf("[Inverse] t_p2b_alpha_sin %f, t_p2b_alpha_cos %f, t_p2b_beta_sin %f, t_p2b_beta_cos %f \n", t_p2b_alpha_sin, t_p2b_alpha_cos, t_p2b_beta_sin, t_p2b_beta_cos);
 #endif
 
-		int leg = (inverse_0_rotation_msg->leg >> 0) & 0x7;
+		
 
 		float p_b_j_x, p_b_j_y, p_b_j_z;
 		float p_s_j_x, p_s_j_y, p_s_j_z;
@@ -160,11 +193,20 @@ THREAD_ENTRY() {
 		}
 
 #if DIRECTAXIACCESS == 1
+	printf("[rt_inverse] "); 
+	a9timer_capture(a9timer, &a9cap_inverse_end, A9TIMER_CAPTURE_STOP);
 	((uint32_t*)(rb_info->pServo))[leg] = v_s_aj_l_mina;
 #else
 
 	inverse_0_legangle_msg->angle = v_s_aj_l_mina;
 	inverse_0_legangle_msg->leg = leg;
+
+	//if(inverse_0_rotation_msg->leg  == 0)
+	{
+		printf("[rt_inverse] "); 
+		a9timer_capture(a9timer, &a9cap_inverse_end, A9TIMER_CAPTURE_STOP);
+	}
+		
 
 	ROS_PUBLISH(inverse_0_pubdata, inverse_0_legangle_msg);
 #endif

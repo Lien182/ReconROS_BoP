@@ -75,26 +75,16 @@ THREAD_ENTRY() {
 
 		ap_uint<32> data;
 		uint32 tmp;
-		
-		switch(demonstrator_nr[0])
-		{
-			case 0: data.range(31,0) = MBOX_GET(inverse_0_cmd); break;
-			case 1: data.range(31,0) = MBOX_GET(inverse_1_cmd);	break;
-			case 2: data.range(31,0) = MBOX_GET(inverse_2_cmd);	break;
-			default: data.range(31,0) = MBOX_GET(inverse_0_cmd); break;
-		}
 
-		if (leg_cnt < 6)
-			leg_cnt++;
-		else
-		{
-			leg_cnt = 1;
-		}
+		uint32 message_payload[3];
 		
 
-		ap_int<16> cmd_alpha = data(30, 17);
-		ap_int<16> cmd_beta  = data(16, 3);
-		ap_uint<3> cmd_l     = data(2, 0);
+		uint32 pMessage = ROS_SUBSCRIBE_TAKE(resources_subdata, inverse_0_rotation_msg );
+		MEM_READ(pMessage, message_payload, 4*3 );
+		
+		ap_int<16> cmd_alpha = message_payload[0];
+		ap_int<16> cmd_beta  = message_payload[1];
+		ap_uint<3> cmd_l     = message_payload[2];
 
 		if(data(30,30) == 1)
 			cmd_alpha |= 0xC000;
@@ -194,6 +184,16 @@ THREAD_ENTRY() {
 				}
 			}
 		}
+
+
+		uint32 senddata[2];
+
+		senddata[0] = v_s_aj_l_mina;
+		senddata[1] = cmd_l;
+		
+		MEM_WRITE
+
+
 
 		switch(demonstrator_nr[0])
 		{

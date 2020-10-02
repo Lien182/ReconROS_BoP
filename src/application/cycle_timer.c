@@ -13,7 +13,11 @@
 #include <sys/mman.h>
 #include <limits.h>
 
-void * cylce_timer_thread(void* arg)
+#include "a9timer.h"
+#include "recobop.h"
+
+
+void * cycle_timer_thread(void* arg)
 {
     t_cycle_timer * cycle_timer;
     cycle_timer = (t_cycle_timer*)arg;
@@ -29,6 +33,22 @@ void * cylce_timer_thread(void* arg)
         pthread_mutex_lock(cycle_timer->mutex);
         pthread_cond_broadcast(cycle_timer->cond);
         pthread_mutex_unlock(cycle_timer->mutex);
+
+        printf("[CYCLE TIMER] ");
+        a9timer_capture(a9timer, &a9cap_cycle_time, A9TIMER_CAPTURE_STOP);
+
+        a9timer_capture(a9timer, &a9cap_touch_start, A9TIMER_CAPTURE_START);
+
+
+	a9cap_touch_end.tStart = a9cap_touch_start.tStart;
+	a9cap_control_start.tStart = a9cap_touch_start.tStart;
+	a9cap_control_end.tStart = a9cap_touch_start.tStart;
+	a9cap_inverse_start.tStart = a9cap_touch_start.tStart;
+	a9cap_inverse_end.tStart = a9cap_touch_start.tStart;
+	a9cap_servo_start.tStart = a9cap_touch_start.tStart;
+	
+        a9cap_cycle_time.tStart = a9cap_touch_start.tStart;
+
         nanosleep(&tim , NULL);
     }
 }
@@ -85,7 +105,7 @@ void cycle_timer_init(t_cycle_timer * cycle_timer, uint64_t period, pthread_mute
             return;
     }
     
-    pthread_create(&cycle_timer->timer_thread, &attr, &cylce_timer_thread, (void*)cycle_timer);
+    pthread_create(&cycle_timer->timer_thread, &attr, &cycle_timer_thread, (void*)cycle_timer);
 	
 }
 
