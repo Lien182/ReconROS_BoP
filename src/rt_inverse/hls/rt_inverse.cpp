@@ -53,23 +53,18 @@ THREAD_ENTRY() {
 
 	uint32 leg_cnt = 0;
 	uint32 rb_info;
-	uint32 demonstrator_nr[1];
-	uint32 stack_addr[1];
-	uint32 threadid[1];
-	uint32 rc_flag[1];
-		
 
+	
+	uint32 outputmsgaddr;
+	
 	{
 		#pragma HLS PROTOCOL fixed
 		THREAD_INIT();
 		
-
 		rb_info = GET_INIT_DATA();
-		MEM_READ( rb_info + 8, demonstrator_nr , 4);
-		MEM_READ( rb_info + 28, stack_addr     , 4);
-		MEM_READ( rb_info + 36, threadid	   , 4);		
+		outputmsgaddr = MEMORY_GETOBJECTADDR(inverse_0_legangle_msg);		
 	}
-	
+		
 
 	while (1) {
 
@@ -79,17 +74,22 @@ THREAD_ENTRY() {
 		uint32 message_payload[3];
 		
 
-		uint32 pMessage = ROS_SUBSCRIBE_TAKE(resources_subdata, inverse_0_rotation_msg );
+		uint32 pMessage = ROS_SUBSCRIBE_TAKE(inverse_0_subdata, inverse_0_rotation_msg );
 		MEM_READ(pMessage, message_payload, 4*3 );
-		
-		ap_int<16> cmd_alpha = message_payload[0];
-		ap_int<16> cmd_beta  = message_payload[1];
-		ap_uint<3> cmd_l     = message_payload[2];
 
-		if(data(30,30) == 1)
+		ap_int<16> cmd_alpha;
+		ap_int<16> cmd_beta;
+		ap_uint<3> cmd_l;
+
+		
+		cmd_alpha.range(13,0) = message_payload[0];
+		cmd_beta.range(13,0)  = message_payload[1];
+		cmd_l.range(15,0)     = message_payload[2];
+
+		if(cmd_alpha(13,13) == 1)
 			cmd_alpha |= 0xC000;
 
-		if(data(16,16) == 1)
+		if(cmd_beta(13,13) == 1)
 			cmd_beta |= 0xC000;
 
 		cmd_alpha *= 10;
@@ -100,7 +100,7 @@ THREAD_ENTRY() {
 		ap_fixed<22,2> t_p2b_beta_sin;
 		ap_fixed<22,2> t_p2b_beta_cos;
 
-		if(data(30,30) == 1)
+		if(cmd_alpha(13,13)  == 1)
 		{
 			cmd_alpha *= -1;
 			t_p2b_alpha_sin = -sin_lut[cmd_alpha >> 8];
@@ -113,7 +113,7 @@ THREAD_ENTRY() {
 			t_p2b_alpha_cos = cos_lut[cmd_alpha >> 8];
 		}
 		
-		if(data(16,16) == 1)
+		if(cmd_beta(13,13)== 1)
 		{
 			cmd_beta *= -1;
 			t_p2b_beta_sin = -sin_lut[cmd_beta >> 8];
@@ -191,30 +191,12 @@ THREAD_ENTRY() {
 		senddata[0] = v_s_aj_l_mina;
 		senddata[1] = cmd_l;
 		
-		MEM_WRITE
+		MEM_WRITE(senddata, outputmsgaddr, 8);
+		ROS_PUBLISH(inverse_0_pubdata, inverse_0_legangle_msg);
 
 
 
-		switch(demonstrator_nr[0])
-		{
-			case 0: MBOX_PUT(servo_0_cmd, (v_s_aj_l_mina, cmd_l, ap_uint<18>(0))); break;
-			case 1: MBOX_PUT(servo_1_cmd, (v_s_aj_l_mina, cmd_l, ap_uint<18>(0))); break;
-			case 2: MBOX_PUT(servo_2_cmd, (v_s_aj_l_mina, cmd_l, ap_uint<18>(0))); break;
-			default: break;
-		}
-
-		MEM_READ( rb_info + 32,  rc_flag , 4);
-		if((rc_flag[0] == 1) && (leg_cnt == 6))
-		{	
-			break;
-		}
 
 		
 	}
-
-	while(MBOX_TRYPUT(reconfiguration_1_request, threadid[0]) != 1);
-	stream_write(osif_hw2sw, OSIF_CMD_THREAD_EXIT);
-	while(1);
-
-
 }
