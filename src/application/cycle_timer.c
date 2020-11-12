@@ -28,6 +28,9 @@ void * cycle_timer_thread(void* arg)
 
     printf("[CYCLE TIMER] period set to %d s, %d ns\n",(uint32_t)tim.tv_sec,(uint32_t)tim.tv_nsec);
 
+    while(!cycle_timer->bStart)
+        nanosleep(&tim , NULL);
+
     while(1)
     {
         pthread_mutex_lock(cycle_timer->mutex);
@@ -61,6 +64,8 @@ void cycle_timer_init(t_cycle_timer * cycle_timer, uint64_t period, pthread_mute
     cycle_timer->mutex  = mutex;
     cycle_timer->cond   = cond;
     cycle_timer->period = period;
+
+    cycle_timer->bStart = 0;
 
     struct sched_param param;
     pthread_attr_t attr;
@@ -114,4 +119,16 @@ void cycle_timer_wait(t_cycle_timer * cycle_timer)
         pthread_mutex_lock(cycle_timer->mutex);
         pthread_cond_wait(cycle_timer->cond, cycle_timer->mutex);
         pthread_mutex_unlock(cycle_timer->mutex); 
+}
+
+
+void cycle_timer_start(t_cycle_timer * cycle_timer)
+{
+        cycle_timer->bStart = 1UL;
+}
+
+
+void cycle_timer_stop(t_cycle_timer * cycle_timer)
+{
+        cycle_timer->bStart = 0UL;
 }

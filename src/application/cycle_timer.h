@@ -19,10 +19,13 @@ typedef struct
     uint64_t            period;
     pthread_mutex_t*    mutex;
     pthread_cond_t*     cond;
+    uint32_t            bStart;
 }t_cycle_timer;
 
 
 void cycle_timer_init(t_cycle_timer * cycle_timer, uint64_t period, pthread_mutex_t*    mutex, pthread_cond_t* cond );
 void cycle_timer_wait(t_cycle_timer * cycle_timer);
+void cycle_timer_start(t_cycle_timer * cycle_timer);
+void cycle_timer_stop(t_cycle_timer * cycle_timer);
 
 #endif
