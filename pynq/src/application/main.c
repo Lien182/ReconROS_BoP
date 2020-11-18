@@ -45,8 +45,6 @@ static void exit_signal(int sig)
 
 
 int main(int argc, char **argv) {
-	int i;
-
 	reconos_init();
 	reconos_app_init();
 
@@ -91,7 +89,7 @@ int main(int argc, char **argv) {
 	signal(SIGTERM, exit_signal);
 	signal(SIGABRT, exit_signal);	
 	
-	for(i = 0; i < 1; i++)
+	for(int i = 0; i < 1; i++)
 	{
 		printf("Init Data on %x \n", (uint32_t)&(rb_info[i]));
 		printf("Servo %x, Touch %x \n", (uint32_t)rb_info[i].pServo, (uint32_t)rb_info[i].pTouch);
@@ -99,10 +97,12 @@ int main(int argc, char **argv) {
 		printf("Init Touch data: 0: %x, 1: %x \n",((uint32_t*)rb_info[i].pTouch)[0] & 0x0fff,((uint32_t*)rb_info[i].pTouch)[1] & 0x0fff);
 	
 		rb_info[i].thread_p[0] = reconos_thread_create_swt_touch    ((void *)&(rb_info[i]), 78-i);	
-		rb_info[i].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[i]), 74-i);
+		rb_info[i].thread_p[1] = reconos_thread_create_hwt_control  ((void *)&(rb_info[i]));
 		rb_info[i].thread_p[2] = reconos_thread_create_hwt_inverse  ((void *)&(rb_info[i]));
 		rb_info[i].thread_p[3] = reconos_thread_create_swt_servo    ((void *)&(rb_info[i]), 66-i);
 	}
+
+	cycle_timer_start(&cycle_timer);
 
 	//video_info.thread_p = reconos_thread_create_hwt_color2bw((void*)(&(video_info.rc_flag)));
 

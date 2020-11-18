@@ -149,54 +149,30 @@ THREAD_ENTRY() {
 	uint32 thread_stack[30];
 
 	uint32 rb_info;
-	uint32 demonstrator_nr[1];
-	uint32 stack_addr[1];
-	uint32 threadid[1];
-	uint32 rc_flag[1];
+
+	uint32 outputmsgaddr;
 
 	{
 		#pragma HLS PROTOCOL fixed
 		THREAD_INIT();
 		rb_info = GET_INIT_DATA();
-		MEM_READ( rb_info + 8, demonstrator_nr , 4);
-		MEM_READ( rb_info + 28, stack_addr     , 4);
-		MEM_READ( rb_info + 36, threadid	   , 4);
+		outputmsgaddr = MEMORY_GETOBJECTADDR(control_0_rotation_msg);	
 	}
-		//Restore the old context
-
-	{
-		//marshalling
-		MEM_READ(stack_addr[0], thread_stack,24*4);
-		int j = 0;
-
-		for(int i = 0; i < 4; i++)
-			restore_apfixed(thread_stack[j++], &x[i] );
-
-		for(int i = 0; i < 16; i++)
-			restore_apfixed(thread_stack[j++], &P[i] );
-
-		restore_apfixed(thread_stack[j++], &error_x_last );
-		restore_apfixed(thread_stack[j++], &error_y_last );
-		restore_apfixed(thread_stack[j++], &u[0] );
-		restore_apfixed(thread_stack[j++], &u[1] );
-	}		
+		
 	
 	while (1) {	
 
 		ap_uint<32> pos;
 		uint32 tmp;
 
-		switch(demonstrator_nr[0])
-		{
-			case 0: pos.range(31,0) = MBOX_GET(touch_0_pos); break;
-			case 1: pos.range(31,0) = MBOX_GET(touch_1_pos); break;
-			case 2: pos.range(31,0) = MBOX_GET(touch_2_pos); break;
-			default: pos.range(31,0) = MBOX_GET(touch_0_pos); break;
-		};
-		
+		ap_int<12> pos_x, pos_y;
 
-		ap_int<12> pos_x = pos(23, 12);
-		ap_int<12> pos_y = pos(11, 0);
+		uint32 pMessage = ROS_SUBSCRIBE_TAKE(control_0_subdata, control_0_position_msg );
+		uint32 message_payload[2];
+		MEM_READ(pMessage, message_payload, 4*2 );
+
+		pos_x.range(11,0) = message_payload[0];
+		pos_y.range(11,0) = message_payload[1];
 
 		p_p_b_x = pos_x;
 		p_p_b_y = pos_y;
@@ -258,7 +234,7 @@ THREAD_ENTRY() {
 		cmd_x = (u[0] * rad2grad) << 6;
 		cmd_y = (u[1] * rad2grad) << 6;
 
-		 
+		/* 
 		switch(demonstrator_nr[0])
 		{
 			case 0: for (int i = 0; i < 6; i++) MBOX_PUT(inverse_0_cmd, (cmd_x, cmd_y, (ap_uint<3>)i)); break;
@@ -267,32 +243,19 @@ THREAD_ENTRY() {
 			default: break;
 		}
 
-		MEM_READ( rb_info + 20,  rc_flag , 4);
-		if(rc_flag[0] == 1)
-		{	
-			break;
-		}
-		
-	}
+		*/
 
+		for(int i = 0; i < 6; i++)
+		{
+			uint32 senddata[3];
+
+			senddata[0] = cmd_x;
+			senddata[1] = cmd_y;
+			senddata[2] = i;
 			
-	//marshalling
-	int j = 0;
-
-	for(int i = 0; i < 4; i++)
-		thread_stack[j++] = x[i].range(N-1,0);
-	for(int i = 0; i < 16; i++)
-		thread_stack[j++] = P[i].range(N-1,0);
-
-	thread_stack[j++] = error_x_last.range(N-1,0);
-	thread_stack[j++] = error_y_last.range(N-1,0);
-	thread_stack[j++] = u[0].range(N-1,0);
-	thread_stack[j++] = u[1].range(N-1,0);
-
-	MEM_WRITE(thread_stack,stack_addr[0],j*4);
-	while(MBOX_TRYPUT(reconfiguration_0_request, threadid[0]) != 1);
-	stream_write(osif_hw2sw, OSIF_CMD_THREAD_EXIT);
-	while(1);
-
-
+			MEM_WRITE(senddata, outputmsgaddr, 12);
+			ROS_PUBLISH(control_0_pubdata, control_0_rotation_msg);
+		}
+	
+	}
 }
