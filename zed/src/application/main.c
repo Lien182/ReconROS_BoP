@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 	
 		rb_info[i].thread_p[0] = reconos_thread_create_swt_touch    ((void *)&(rb_info[i]), 78-i);	
 		rb_info[i].thread_p[1] = reconos_thread_create_hwt_control  ((void *)&(rb_info[i]));
-		rb_info[i].thread_p[2] = reconos_thread_create_hwt_inverse  ((void *)&(rb_info[i]));
+		//rb_info[i].thread_p[2] = reconos_thread_create_hwt_inverse  ((void *)&(rb_info[i]));
 		rb_info[i].thread_p[3] = reconos_thread_create_swt_servo    ((void *)&(rb_info[i]), 66-i);
 	}
 
