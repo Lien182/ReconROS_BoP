@@ -27,6 +27,7 @@
 
 #define HDMI_INPUT_WIDTH 640
 #define HDMI_INPUT_HEIGHT 480
+#define HDMI_OUTPUT_WIDTH 1680
 #define PIXEL_BYTE 4
 
 
@@ -40,7 +41,7 @@
 
 volatile struct recobop_info rb_info[3];
 
-t_hdmi_input	hdmi_input;
+t_hdmi_output	hdmi_output;
 
 #define OFFSETOF(type, member) ((uint32_t)(intptr_t)&(((type *)(void*)0)->member) )
 
@@ -61,37 +62,21 @@ int main(int argc, char **argv) {
 		printf("Error while allocating memory \n");
 		return -1;
 	}
-
-	if(hdmi_input_init(&(hdmi_input), "/dev/video0", video_cmd) != 0)
+	if(hdmi_output_init(&hdmi_output, "/dev/fb0") != 0)
 	{
 		printf("HDMI Output: Init error \n");
-		return -2;
 	}
 
 
-
-	uint8_t * fb = malloc(HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE);
-
 	while(1)
 	{
-		printf("HMDI Input: width=%d, height=%d \n", hdmi_input.width, hdmi_input.height);
-		
-		uint32_t addr = mbox_get(video_cmd);
 
-		memcpy(fb, (void*)addr, HDMI_INPUT_HEIGHT*HDMI_INPUT_WIDTH*PIXEL_BYTE);
+		ROS_SUBSCRIBE_TAKE(video_subdata, video_image_msg_in);
 
-		video_image_msg_out->height = HDMI_INPUT_HEIGHT;
-		video_image_msg_out->width = HDMI_INPUT_WIDTH;
-		video_image_msg_out->encoding.data = "rgba8";
-		video_image_msg_out->encoding.size = 6;
-		video_image_msg_out->encoding.capacity = 7;
-		video_image_msg_out->data.data = fb;
-		video_image_msg_out->data.size = HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE;
-		video_image_msg_out->data.capacity = HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE+1;
-		video_image_msg_out->step = HDMI_INPUT_WIDTH*PIXEL_BYTE;
-		
-
-		ROS_PUBLISH(video_pubdata, video_image_msg_out);
+		for(int i = 0; i < HDMI_INPUT_HEIGHT;i++)
+		{
+			memcpy(&(hdmi_output.image[HDMI_OUTPUT_WIDTH*i]), &((uint32_t*)video_image_msg_in->data.data)[HDMI_INPUT_WIDTH*i], HDMI_INPUT_WIDTH*4);
+		}
 		//sleep(1);
 		
 		/*
