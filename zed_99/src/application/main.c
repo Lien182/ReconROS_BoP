@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 	if(hdmi_input_init(&(hdmi_input), "/dev/video0", video_cmd) != 0)
 	{
-		printf("HDMI Output: Init error \n");
+		printf("HDMI Input: Init error \n");
 		return -2;
 	}
 
