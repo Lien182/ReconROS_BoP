@@ -25,10 +25,7 @@
 #include "hdmi.h"
 
 
-#define HDMI_INPUT_WIDTH 640
-#define HDMI_INPUT_HEIGHT 480
-#define HDMI_OUTPUT_WIDTH 1680
-#define PIXEL_BYTE 4
+
 
 
 #define BOP_0_TOUCH_BASE_ADDR 0x43C10000
@@ -41,7 +38,6 @@
 
 volatile struct recobop_info rb_info[3];
 
-t_hdmi_output	hdmi_output;
 
 #define OFFSETOF(type, member) ((uint32_t)(intptr_t)&(((type *)(void*)0)->member) )
 
@@ -67,27 +63,13 @@ int main(int argc, char **argv) {
 		printf("HDMI Output: Init error \n");
 	}
 
+	rb_info[0].thread_p[2] = reconos_thread_create_swt_monitor  ((void *)hdmi_output.image, 0);
 
 	while(1)
 	{
 
-		ROS_SUBSCRIBE_TAKE(video_subdata, video_image_msg_in);
 
-		for(int i = 0; i < HDMI_INPUT_HEIGHT;i++)
-		{
-			memcpy(&(hdmi_output.image[HDMI_OUTPUT_WIDTH*i]), &((uint32_t*)video_image_msg_in->data.data)[HDMI_INPUT_WIDTH*i], HDMI_INPUT_WIDTH*4);
-		}
-		//sleep(1);
-		
-		/*
-		if(ros_subscriber_message_try_take(video_subdata, video_image_msg_in))
-		{
-			printf("MSG= 0x%x \n", video_image_msg_in);
-			printf("Data =  x%x \n", OFFSETOF(sensor_msgs__msg__Image, data.data) + video_image_msg_in);
-			printf("Data =  x%x \n", *((uint32_t*)(((uint32_t)OFFSETOF(sensor_msgs__msg__Image, data.data)) + ((uint32_t)video_image_msg_in))));
-		}*/
-
-		//printf("mbox: 0x%x \n", mbox_get(video_mbox_debug));
+		sleep(10);
 		
 		
 	}
