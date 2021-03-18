@@ -74,6 +74,8 @@ class ssh:
                 #strdata = strdata + str(alldata)
                 #fulldata = fulldata + str(alldata)
                 #strdata = self.print_lines(strdata) # print all received data except last line
+            else:
+                time.sleep(0.1)
 
     def print_lines(self, data):
         last_line = data
@@ -132,9 +134,11 @@ class ReconROSClient:
 
     def thread_function(self,c):
         #self.connect()
+        self.ssh.sendfile(self.name + "/build.hw/myReconOS.runs/impl_1/design_1_wrapper.bit", "/mnt/download.bit", False)
         self.ssh.sendfile(self.name + "/build.sw/recobop", "/mnt/recobop", True)
 
         self.ssh.open_shell()
+        self.ssh.send_shell('cat /mnt/download.bit > /dev/xdevcfg')
         self.ssh.send_shell('cd /opt/reconos/')
         self.ssh.send_shell('./reconos_init.sh')
         self.ssh.send_shell('source /opt/ros/dashing/setup.bash')

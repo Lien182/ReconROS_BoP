@@ -41,7 +41,7 @@
 		volatile struct 	reconos_thread *thread_p[4];
 	};
 
-
+	volatile struct 	reconos_thread *video_threads[4];	
 
 	static inline uint32_t fltofi(float f, int n, int dn) {
 		int i;

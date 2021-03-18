@@ -51,16 +51,6 @@ THREAD_ENTRY()
 		uint32 address;
 		uint32 status = 0;
 
-		{
-			#pragma HLS PROTOCOL fixed
-			MEM_READ( initdata,  rc_flag , 4);
-			if(rc_flag[0] == 1)
-			{	
-				break;
-			}
-			ap_wait();
-			address=MBOX_GET(video_cmd);
-		}
 
 		//address <<=2;
 		MEM_READ( address, input_linebuffer, INPUT_PREFETCH_SIZE);
@@ -107,9 +97,4 @@ THREAD_ENTRY()
 
 		
 	}
-
-	while(MBOX_TRYPUT(reconfiguration_v_request, 0xAAAAAAAA) != 1);
-	stream_write(osif_hw2sw, OSIF_CMD_THREAD_EXIT);
-	while(1);
-
 }

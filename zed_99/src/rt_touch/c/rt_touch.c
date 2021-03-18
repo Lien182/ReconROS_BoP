@@ -15,7 +15,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 THREAD_ENTRY() {
 	struct recobop_info *rb_info;
