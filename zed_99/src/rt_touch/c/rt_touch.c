@@ -15,7 +15,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 THREAD_ENTRY() {
 	struct recobop_info *rb_info;
@@ -59,12 +59,33 @@ THREAD_ENTRY() {
 		//printf("[rt_touch] x_pos %08x, y_pos %08x \n", x_pos, y_pos);
 #endif
 
-		touch_0_position_msg->x = x_pos;
-		touch_0_position_msg->y = y_pos;
+		if(rb_info->demo_nr == 0)
+		{
+			touch_0_position_msg->x = x_pos;
+			touch_0_position_msg->y = y_pos;
 		
-		printf("[rt_touch] ");
-		a9timer_capture(a9timer, &a9cap_touch_end, A9TIMER_CAPTURE_STOP);
-		ROS_PUBLISH(touch_0_pubdata, touch_0_position_msg);
+			printf("[rt_touch] ");
+			a9timer_capture(a9timer, &a9cap_touch_end, A9TIMER_CAPTURE_STOP);
+			ROS_PUBLISH(touch_0_pubdata, touch_0_position_msg);
+		}
+		else if(rb_info->demo_nr == 1)
+		{
+			touch_1_position_msg->x = x_pos;
+			touch_1_position_msg->y = y_pos;
+		
+			printf("[rt_touch] ");
+			a9timer_capture(a9timer, &a9cap_touch_end, A9TIMER_CAPTURE_STOP);
+			ROS_PUBLISH(touch_1_pubdata, touch_1_position_msg);
+		}
+		else if(rb_info->demo_nr == 2)
+		{
+			touch_2_position_msg->x = x_pos;
+			touch_2_position_msg->y = y_pos;
+		
+			printf("[rt_touch] ");
+			a9timer_capture(a9timer, &a9cap_touch_end, A9TIMER_CAPTURE_STOP);
+			ROS_PUBLISH(touch_2_pubdata, touch_2_position_msg);
+		}
 
 	}
 }

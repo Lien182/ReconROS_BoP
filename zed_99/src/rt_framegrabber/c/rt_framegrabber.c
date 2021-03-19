@@ -20,7 +20,7 @@ THREAD_ENTRY()
 	THREAD_INIT();
 
 	
-	struct reconos_thread * rt = GET_INIT_DATA();
+	//struct reconos_thread * rt = GET_INIT_DATA();
 
 
 	uint8_t * fb = malloc(HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE);

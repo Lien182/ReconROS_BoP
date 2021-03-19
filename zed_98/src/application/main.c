@@ -24,18 +24,6 @@
 #include "axi_servo.h"
 #include "hdmi.h"
 
-
-
-
-
-#define BOP_0_TOUCH_BASE_ADDR 0x43C10000
-#define BOP_0_SERVO_BASE_ADDR 0x43C00000
-#define BOP_1_TOUCH_BASE_ADDR 0x43C30000
-#define BOP_1_SERVO_BASE_ADDR 0x43C70000
-#define BOP_2_TOUCH_BASE_ADDR 0x43C50000
-#define BOP_2_SERVO_BASE_ADDR 0x43C60000
-
-
 volatile struct recobop_info rb_info[3];
 
 
@@ -58,12 +46,24 @@ int main(int argc, char **argv) {
 		printf("Error while allocating memory \n");
 		return -1;
 	}
+	
+	/*
 	if(hdmi_output_init(&hdmi_output, "/dev/fb0") != 0)
 	{
 		printf("HDMI Output: Init error \n");
 	}
+	*/
 
-	rb_info[0].thread_p[2] = reconos_thread_create_swt_monitor  ((void *)hdmi_output.image, 0);
+
+	for(int i = 1; i < 2; i++)
+	{
+		rb_info[i].demo_nr = i;
+		rb_info[i].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[i]), 73);
+		rb_info[i].thread_p[2] = reconos_thread_create_swt_inverse  ((void *)&(rb_info[i]), 72);			
+	}
+
+
+	//rb_info[0].thread_p[2] = reconos_thread_create_swt_monitor  ((void *)hdmi_output.image, 0);
 
 	while(1)
 	{

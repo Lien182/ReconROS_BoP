@@ -72,10 +72,10 @@ void cycle_timer_init(t_cycle_timer * cycle_timer, uint64_t period, pthread_mute
     int ret;
 
     /* Lock memory */
-    if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
+  /*  if(mlockall(MCL_CURRENT) == -1) {
             printf("[CYCLE TIMER] mlockall failed: %m\n");
             exit(-2);
-    }
+    }*/
 
     /* Initialize pthread attributes (default values) */
     ret = pthread_attr_init(&attr);
@@ -85,11 +85,13 @@ void cycle_timer_init(t_cycle_timer * cycle_timer, uint64_t period, pthread_mute
     }
 
     /* Set a specific stack size  */
+    /*
     ret = pthread_attr_setstacksize(&attr, PTHREAD_STACK_MIN);
     if (ret) {
         printf("[CYCLE TIMER] pthread setstacksize failed\n");
         return;
     }
+    */
 
     /* Set scheduler policy and priority of pthread */
     ret = pthread_attr_setschedpolicy(&attr, SCHED_FIFO);

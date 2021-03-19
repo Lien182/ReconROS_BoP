@@ -81,20 +81,33 @@ THREAD_ENTRY() {
 	printf("Inverse Thread for demonstrator %d \n", rb_info->demo_nr);
 
 	while (1) {
+		float t_p2b_alpha = 0.0f;
+		float t_p2b_beta = 0.0f;
+		int leg = 0;
 
 
-#ifdef ROS				
-		ROS_SUBSCRIBE_TAKE(inverse_0_subdata, inverse_0_rotation_msg);
-		
-		//if(inverse_0_rotation_msg->leg  == 0)
-		{
-			printf("[rt_inverse] "); 
-			a9timer_capture(a9timer, &a9cap_inverse_start, A9TIMER_CAPTURE_STOP); 
+#ifdef ROS
+		if(rb_info->demo_nr == 0)
+		{				
+			ROS_SUBSCRIBE_TAKE(inverse_0_subdata, inverse_0_rotation_msg);		
+			t_p2b_alpha = fitofl((inverse_0_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
+			t_p2b_beta  = fitofl((inverse_0_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
+			leg = inverse_0_rotation_msg->leg & 0x7;
 		}
-		float t_p2b_alpha = fitofl((inverse_0_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
-		float t_p2b_beta  = fitofl((inverse_0_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
-		int leg = inverse_0_rotation_msg->leg & 0x7;
-
+		else if(rb_info->demo_nr == 1)
+		{				
+			ROS_SUBSCRIBE_TAKE(inverse_1_subdata, inverse_1_rotation_msg);		
+			t_p2b_alpha = fitofl((inverse_1_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
+			t_p2b_beta  = fitofl((inverse_1_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
+			leg = inverse_1_rotation_msg->leg & 0x7;
+		} 
+		else if(rb_info->demo_nr == 2)
+		{				
+			ROS_SUBSCRIBE_TAKE(inverse_2_subdata, inverse_2_rotation_msg);		
+			t_p2b_alpha = fitofl((inverse_2_rotation_msg->cmd_x ) & 0x3fff, 14, 6);
+			t_p2b_beta  = fitofl((inverse_2_rotation_msg->cmd_y ) & 0x3fff, 14, 6);
+			leg = inverse_2_rotation_msg->leg & 0x7;
+		}
 
 		/*
 		uint32_t data = MBOX_GET(legacy_0_inverse_0_cmd);
@@ -198,17 +211,25 @@ THREAD_ENTRY() {
 	((uint32_t*)(rb_info->pServo))[leg] = v_s_aj_l_mina;
 #else
 
-	inverse_0_legangle_msg->angle = v_s_aj_l_mina;
-	inverse_0_legangle_msg->leg = leg;
-
-	//if(inverse_0_rotation_msg->leg  == 0)
-	{
-		printf("[rt_inverse] "); 
-		a9timer_capture(a9timer, &a9cap_inverse_end, A9TIMER_CAPTURE_STOP);
+	if(rb_info->demo_nr == 0)
+	{				
+		inverse_0_legangle_msg->angle = v_s_aj_l_mina;
+		inverse_0_legangle_msg->leg = leg;
+		ROS_PUBLISH(inverse_0_pubdata, inverse_0_legangle_msg);
 	}
-		
+	else if(rb_info->demo_nr == 1)
+	{				
+		inverse_1_legangle_msg->angle = v_s_aj_l_mina;
+		inverse_1_legangle_msg->leg = leg;
+		ROS_PUBLISH(inverse_1_pubdata, inverse_1_legangle_msg);
+	}
+	else if(rb_info->demo_nr == 2)
+	{				
+		inverse_2_legangle_msg->angle = v_s_aj_l_mina;
+		inverse_2_legangle_msg->leg = leg;
+		ROS_PUBLISH(inverse_2_pubdata, inverse_2_legangle_msg);
+	}
 
-	ROS_PUBLISH(inverse_0_pubdata, inverse_0_legangle_msg);
 #endif
 	}
 }

@@ -146,11 +146,10 @@ THREAD_ENTRY() {
 	float error_y_diff = 0,  error_y_last = 0;
 
 	float ctrl_x, ctrl_y;
-
+#if REFERENCE_CYCLE == 1
 	float dd = 0;
+#endif
 	float target_x, target_y;
-
-	FILE * fd;
 
 	uint32_t bFirst = 1;
 
@@ -192,14 +191,23 @@ THREAD_ENTRY() {
 		volatile uint32_t pos;
 
 #if DIRECTAXIACCESS == 0
+	
+		if(rb_info->demo_nr == 0)
+		{				
+			ROS_SUBSCRIBE_TAKE(control_0_subdata, control_0_position_msg);
+			pos = (control_0_position_msg->y & 0x00fff) | ((control_0_position_msg->x & 0x00fff ) << 12);
+		}
+		else if(rb_info->demo_nr == 1)
+		{				
+			ROS_SUBSCRIBE_TAKE(control_1_subdata, control_1_position_msg);
+			pos = (control_1_position_msg->y & 0x00fff) | ((control_1_position_msg->x & 0x00fff ) << 12);
+		}
+		else if(rb_info->demo_nr == 2)
+		{				
+			ROS_SUBSCRIBE_TAKE(control_2_subdata, control_2_position_msg);
+			pos = (control_2_position_msg->y & 0x00fff) | ((control_2_position_msg->x & 0x00fff ) << 12);
+		}
 
-		ROS_SUBSCRIBE_TAKE(control_0_subdata, control_0_position_msg);
-		printf("[rt_control] ");
-		a9timer_capture(a9timer, &a9cap_control_start, A9TIMER_CAPTURE_STOP);
-
-		pos = (control_0_position_msg->y & 0x00fff) | ((control_0_position_msg->x & 0x00fff ) << 12);
-
-		
 
 		
 #else
@@ -334,19 +342,37 @@ else
 
 #ifdef ROS
 
-		for (i = 0; i < 6; i++)
-		{
-			control_0_rotation_msg->cmd_x = cmd_x;
-			control_0_rotation_msg->cmd_y = cmd_y;
-			control_0_rotation_msg->leg = i;
-			if(i == 5)
+		if(rb_info->demo_nr == 0)
+		{				
+			for (i = 0; i < 6; i++)
 			{
-				printf("[rt_control] ");
-				a9timer_capture(a9timer, &a9cap_control_end, A9TIMER_CAPTURE_STOP);
+				control_0_rotation_msg->cmd_x = cmd_x;
+				control_0_rotation_msg->cmd_y = cmd_y;
+				control_0_rotation_msg->leg = i;
+				ROS_PUBLISH(control_0_pubdata, control_0_rotation_msg);
 			}
-				
-			ROS_PUBLISH(control_0_pubdata, control_0_rotation_msg);
 		}
+		else if(rb_info->demo_nr == 1)
+		{				
+			for (i = 0; i < 6; i++)
+			{
+				control_1_rotation_msg->cmd_x = cmd_x;
+				control_1_rotation_msg->cmd_y = cmd_y;
+				control_1_rotation_msg->leg = i;
+				ROS_PUBLISH(control_1_pubdata, control_1_rotation_msg);
+			}
+		}
+		else if(rb_info->demo_nr == 2)
+		{				
+			for (i = 0; i < 6; i++)
+			{
+				control_2_rotation_msg->cmd_x = cmd_x;
+				control_2_rotation_msg->cmd_y = cmd_y;
+				control_2_rotation_msg->leg = i;
+				ROS_PUBLISH(control_2_pubdata, control_2_rotation_msg);
+			}
+		}
+
 		
 
 #else
