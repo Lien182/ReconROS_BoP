@@ -55,4 +55,8 @@ build.hw/
 build.sw/
 build.msg/
 
+system.hw/
+system.sw/
+system.msg/
+
 vivado*
