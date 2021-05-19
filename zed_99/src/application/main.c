@@ -33,6 +33,13 @@
 #define BOP_2_SERVO_BASE_ADDR 0x43C60000
 
 
+#define HDMI_INPUT_WIDTH 640
+#define HDMI_INPUT_HEIGHT 480
+#define PIXEL_BYTE 4
+#define HDMI_OUTPUT_WIDTH 1680
+
+
+
 volatile struct recobop_info rb_info[3];
 
 t_hdmi_input	hdmi_input;
@@ -46,6 +53,21 @@ static void exit_signal(int sig)
 	exit(0);
 }
 
+void framegrabber_init(void)
+{
+	uint8_t * fb = malloc(HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE);
+    video_image_msg_out->height = HDMI_INPUT_HEIGHT;
+    video_image_msg_out->width = HDMI_INPUT_WIDTH;
+    video_image_msg_out->encoding.data = "rgba8";
+    video_image_msg_out->encoding.size = 6;
+    video_image_msg_out->encoding.capacity = 7;
+    video_image_msg_out->data.data = fb;
+    video_image_msg_out->data.size = HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE;
+    video_image_msg_out->data.capacity = HDMI_INPUT_WIDTH*HDMI_INPUT_HEIGHT*PIXEL_BYTE+1;
+    video_image_msg_out->step = HDMI_INPUT_WIDTH*PIXEL_BYTE;
+
+}
+
 
 int main(int argc, char **argv) {
 	reconos_init();
@@ -56,16 +78,25 @@ int main(int argc, char **argv) {
 		printf("Error while allocating memory \n");
 		return -1;
 	}
-/*
+
 	if(hdmi_input_init(&(hdmi_input), "/dev/video0", video_cmd) != 0)
 	{
 		printf("HDMI Input: Init error \n");
 		return -2;
 	}
-*/
-	cycle_timer_init(&cycle_timer, 20, cycle_timer_cmd_mutex, cycle_timer_cmd_cond);
 
-	a9timer = a9timer_init();
+	/*
+	if(hdmi_output_init(&hdmi_output, "/dev/fb0") != 0)
+	{
+		printf("HDMI Output: Init error \n");
+	}
+	else
+		printf("HDMI Output: Width %d, Height %d \n", hdmi_output.width, hdmi_output.height);
+
+*/
+//	cycle_timer_init(&cycle_timer, 20, cycle_timer_cmd_mutex, cycle_timer_cmd_cond);
+
+//	a9timer = a9timer_init();
 
 
 	rb_info[0].timerregister = &(a9timer->TMR_CNT_REG_L);
@@ -101,9 +132,17 @@ int main(int argc, char **argv) {
 	signal(SIGTERM, exit_signal);
 	signal(SIGABRT, exit_signal);	
 
-	video_threads[0] = reconos_thread_create_swt_framegrabber  ((void *)&(rb_info[0]), 0);
+	framegrabber_init();
 
+	//video_threads[0] =  reconos_thread_create_hwt_monitor  ((void *)hdmi_output.image);
 	
+	//video_threads[0] =  reconos_thread_create_hwt_monitor  ((void *)hdmi_output.image);
+
+	video_threads[0] =  reconos_thread_create_hwt_framegrabber  (video_image_msg_out->data.data);
+	
+
+
+	/*
 
 	for(int i = 0; i < 3; i++)
 	{
@@ -125,7 +164,7 @@ int main(int argc, char **argv) {
 	
 	
 	cycle_timer_start(&cycle_timer);
-
+	*/
 	while(1)
 	{
 		sleep(1);
