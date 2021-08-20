@@ -67,7 +67,7 @@ class ssh:
                     alldata += self.shell.recv(512)
                 
                 sem.acquire()
-                print(bcolors.FAIL + str(self.id))
+                print(bcolors.FAIL + "zed_"+str(self.id))
                 print(bcolors.WHITE + str(alldata,'utf-8'))
                 sem.release()
                 #strdata = strdata + str(alldata)
@@ -135,14 +135,16 @@ class ReconROSClient:
         #self.connect()
         self.ssh.sendfile(self.name + "/build.hw/myReconOS.runs/impl_1/design_1_wrapper.bit", "/mnt/download.bit", False)
         self.ssh.sendfile(self.name + "/build.sw/recobop", "/mnt/recobop", True)
+        self.ssh.sendfile(self.name + "/build.msg/message_package.zip", "/mnt/message_package.zip", True)
 
         self.ssh.open_shell()
         self.ssh.send_shell('cat /mnt/download.bit > /dev/xdevcfg')
         self.ssh.send_shell('cd /opt/reconos/')
         self.ssh.send_shell('./reconos_init.sh')
         self.ssh.send_shell('source /opt/ros/dashing/setup.bash')
-        self.ssh.send_shell('source /mnt/msg_pack/install/local_setup.bash')
-        self.ssh.send_shell('/mnt/recobop')
+        self.ssh.send_shell('rm /mnt/msg/ -r -f && mkdir /mnt/msg/ && cd /mnt/msg/ && unzip ../message_package.zip && cd /mnt/ && source /mnt/msg/install/local_setup.bash && /mnt/recobop')
+        #self.ssh.send_shell('source /mnt/msg_pack/install/local_setup.bash')
+        #self.ssh.send_shell('/mnt/recobop')
         
         while not self.ExitRequest:
             time.sleep(1)
