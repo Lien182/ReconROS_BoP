@@ -23,6 +23,7 @@
 #include "axi_touch.h"
 #include "axi_servo.h"
 #include "hdmi.h"
+#include "difference_measurement.h"
 
 
 #define BOP_0_TOUCH_BASE_ADDR 0x43C10000
@@ -31,6 +32,8 @@
 #define BOP_1_SERVO_BASE_ADDR 0x43C70000
 #define BOP_2_TOUCH_BASE_ADDR 0x43C50000
 #define BOP_2_SERVO_BASE_ADDR 0x43C60000
+
+#define DIFFERENCE_MEASUREMENT_ADDR 0x43C80000
 
 
 #define HDMI_INPUT_WIDTH 640
@@ -79,13 +82,15 @@ int main(int argc, char **argv) {
 		return -1;
 	}
 
+
+	diff_measurement = diff_timer_init(DIFFERENCE_MEASUREMENT_ADDR);
+/*
 	if(hdmi_input_init(&(hdmi_input), "/dev/video0", video_cmd) != 0)
 	{
 		printf("HDMI Input: Init error \n");
 		return -2;
 	}
 
-	/*
 	if(hdmi_output_init(&hdmi_output, "/dev/fb0") != 0)
 	{
 		printf("HDMI Output: Init error \n");
@@ -94,9 +99,9 @@ int main(int argc, char **argv) {
 		printf("HDMI Output: Width %d, Height %d \n", hdmi_output.width, hdmi_output.height);
 
 */
-//	cycle_timer_init(&cycle_timer, 20, cycle_timer_cmd_mutex, cycle_timer_cmd_cond);
+	cycle_timer_init(&cycle_timer, 20, cycle_timer_cmd_mutex, cycle_timer_cmd_cond);
 
-//	a9timer = a9timer_init();
+	a9timer = a9timer_init();
 
 
 	rb_info[0].timerregister = &(a9timer->TMR_CNT_REG_L);
@@ -132,18 +137,15 @@ int main(int argc, char **argv) {
 	signal(SIGTERM, exit_signal);
 	signal(SIGABRT, exit_signal);	
 
-	framegrabber_init();
+	//framegrabber_init();
 
 	//video_threads[0] =  reconos_thread_create_hwt_monitor  ((void *)hdmi_output.image);
 	
 	//video_threads[0] =  reconos_thread_create_hwt_monitor  ((void *)hdmi_output.image);
 
-	video_threads[0] =  reconos_thread_create_hwt_framegrabber  (video_image_msg_out->data.data);
+	//video_threads[0] =  reconos_thread_create_hwt_framegrabber  (video_image_msg_out->data.data);
 	
-
-
-	/*
-
+	
 	for(int i = 0; i < 3; i++)
 	{
 		printf("Init Data on %x \n", (uint32_t)&(rb_info[i]));
@@ -151,20 +153,32 @@ int main(int argc, char **argv) {
 		printf("Init Servo data: 0: %x, 1: %x \n",((uint32_t*)rb_info[i].pServo)[0] & 0x0fff,((uint32_t*)rb_info[i].pServo)[1] & 0x0fff);
 		printf("Init Touch data: 0: %x, 1: %x \n",((uint32_t*)rb_info[i].pTouch)[0] & 0x0fff,((uint32_t*)rb_info[i].pTouch)[1] & 0x0fff);
 	
-		rb_info[i].thread_p[0] = reconos_thread_create_swt_touch    ((void *)&(rb_info[i]), 74);
+		
 	
 		if( i == 0)
 		{
-			rb_info[i].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[i]), 73);
-			rb_info[i].thread_p[2] = reconos_thread_create_swt_inverse  ((void *)&(rb_info[i]), 72);			
+			rb_info[i].thread_p[0] = reconos_thread_create_hwt_touch    ((void *)&(rb_info[i]));
+			rb_info[i].thread_p[3] = reconos_thread_create_swt_servo    ((void *)&(rb_info[i]), 71);		
+		}
+		else if(i == 1)
+		{
+			rb_info[i].thread_p[0] = reconos_thread_create_hwt_touch    ((void *)&(rb_info[i]));
+			rb_info[i].thread_p[3] = reconos_thread_create_swt_servo    ((void *)&(rb_info[i]), 71);
+			rb_info[i].thread_p[2] = reconos_thread_create_swt_inverse  ((void *)&(rb_info[i]), 72);
 		}	
+		else if(i == 2)
+		{
+			rb_info[i].thread_p[0] = reconos_thread_create_swt_touch    ((void *)&(rb_info[i]), 71);
+			rb_info[i].thread_p[3] = reconos_thread_create_hwt_servo    ((void *)&(rb_info[i]));
+		}
 
-		rb_info[i].thread_p[3] = reconos_thread_create_swt_servo    ((void *)&(rb_info[i]), 71);
+
+		
 	}
 	
 	
 	cycle_timer_start(&cycle_timer);
-	*/
+	
 	while(1)
 	{
 		sleep(1);

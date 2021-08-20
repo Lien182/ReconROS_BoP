@@ -19,7 +19,8 @@ typedef struct
 	volatile uint32_t 	CAP1;
 	volatile uint32_t	CAP2;
 	volatile uint32_t	CAP3;
-
+	volatile uint32_t	CAP4;
+	volatile uint32_t	CAP5;
 }t_diff_measurement;
 
 

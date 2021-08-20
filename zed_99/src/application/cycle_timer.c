@@ -37,10 +37,9 @@ void * cycle_timer_thread(void* arg)
         pthread_cond_broadcast(cycle_timer->cond);
         pthread_mutex_unlock(cycle_timer->mutex);
 
-        printf("[CYCLE TIMER] ");
-        a9timer_capture(a9timer, &a9cap_cycle_time, A9TIMER_CAPTURE_STOP);
+        //a9timer_capture(a9timer, &a9cap_cycle_time, A9TIMER_CAPTURE_STOP);
 
-        a9timer_capture(a9timer, &a9cap_touch_start, A9TIMER_CAPTURE_START);
+        //a9timer_capture(a9timer, &a9cap_touch_start, A9TIMER_CAPTURE_START);
 
 
 	a9cap_touch_end.tStart = a9cap_touch_start.tStart;
@@ -52,7 +51,29 @@ void * cycle_timer_thread(void* arg)
 	
         a9cap_cycle_time.tStart = a9cap_touch_start.tStart;
 
+    
+
         nanosleep(&tim , NULL);
+
+
+        a9cap_demonstrator_cycle_time[0].tStart = diff_measurement->CAP0;	
+        a9cap_demonstrator_cycle_time[1].tStart = diff_measurement->CAP1;
+        a9cap_demonstrator_cycle_time[2].tStart = diff_measurement->CAP2;
+
+	a9cap_demonstrator_cycle_time[0].tStop = diff_measurement->CAP3;
+        a9cap_demonstrator_cycle_time[1].tStop = diff_measurement->CAP4;
+        a9cap_demonstrator_cycle_time[2].tStop = diff_measurement->CAP5;
+        		
+	printf("[CYCLE TIMER] %u;%f;%u;%f;%u;%f;\n",  a9cap_demonstrator_cycle_time[0].tStart,
+                                                        (float)(a9cap_demonstrator_cycle_time[0].tStop - a9cap_demonstrator_cycle_time[0].tStart) *  0.00001f,
+                                                        a9cap_demonstrator_cycle_time[1].tStart,
+                                                        (float)(a9cap_demonstrator_cycle_time[1].tStop - a9cap_demonstrator_cycle_time[1].tStart) *  0.00001f,
+                                                        a9cap_demonstrator_cycle_time[2].tStart,
+                                                        (float)(a9cap_demonstrator_cycle_time[2].tStop - a9cap_demonstrator_cycle_time[2].tStart) *  0.00001f );
+	
+
+
+
     }
 }
 

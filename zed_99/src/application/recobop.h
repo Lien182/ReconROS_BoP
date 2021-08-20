@@ -5,6 +5,8 @@
 * Author(s): Christoph Rueting, Christian Lienen                    *   
 *                                                                   *   
 ********************************************************************/
+#define DEMONSTRATOR_NR 0
+
 #ifndef RECOBOP_H
 	#define RECOBOP_H
 
@@ -101,7 +103,7 @@
 		return d + w;
 	}
 
-
+	t_diff_measurement * diff_measurement;
 	t_a9timer * a9timer;
 	t_cycle_timer cycle_timer;
 
@@ -115,8 +117,12 @@
 	
 	
 	t_a9timer_capture a9cap_cycle_time;
+	t_a9timer_capture a9cap_demonstrator_cycle_time[3];
+	
 
 #else
+	extern t_diff_measurement * diff_measurement;
+
 	extern t_a9timer * a9timer;
 	extern t_cycletimer cycle_timer;
 
