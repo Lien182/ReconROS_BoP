@@ -7,7 +7,7 @@
 ********************************************************************/
 #ifndef RECOBOP_H
 	#define RECOBOP_H
-
+	
 	#include "reconos.h"
 	#include "log.h"
 	#include "a9timer.h"
@@ -104,16 +104,7 @@
 	t_a9timer * a9timer;
 	t_cycle_timer cycle_timer;
 
-	t_a9timer_capture a9cap_touch_start;
-	t_a9timer_capture a9cap_touch_end;
-	t_a9timer_capture a9cap_control_start;
-	t_a9timer_capture a9cap_control_end;
-	t_a9timer_capture a9cap_inverse_start;
-	t_a9timer_capture a9cap_inverse_end;
-	t_a9timer_capture a9cap_servo_start;
-	
-	
-	t_a9timer_capture a9cap_cycle_time;
+	t_a9timer_capture demonstrator_cycle_time[3];
 
 #else
 	extern t_a9timer * a9timer;

@@ -55,13 +55,12 @@ int main(int argc, char **argv) {
 	*/
 
 
-	for(int i = 1; i < 2; i++)
-	{
-		rb_info[i].demo_nr = i;
-		rb_info[i].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[i]), 73);
-		rb_info[i].thread_p[2] = reconos_thread_create_swt_inverse  ((void *)&(rb_info[i]), 72);			
-	}
+	rb_info[0].demo_nr = 0;
+	rb_info[0].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[0]), 73);
+	rb_info[0].thread_p[2] = reconos_thread_create_hwt_inverse  ((void *)&(rb_info[0]));	
 
+	rb_info[1].demo_nr = 1;
+	rb_info[1].thread_p[1] = reconos_thread_create_swt_control  ((void *)&(rb_info[1]), 73);
 
 	//rb_info[0].thread_p[2] = reconos_thread_create_swt_monitor  ((void *)hdmi_output.image, 0);
 

@@ -38,20 +38,6 @@ void * cycle_timer_thread(void* arg)
         pthread_mutex_unlock(cycle_timer->mutex);
 
         printf("[CYCLE TIMER] ");
-        a9timer_capture(a9timer, &a9cap_cycle_time, A9TIMER_CAPTURE_STOP);
-
-        a9timer_capture(a9timer, &a9cap_touch_start, A9TIMER_CAPTURE_START);
-
-
-	a9cap_touch_end.tStart = a9cap_touch_start.tStart;
-	a9cap_control_start.tStart = a9cap_touch_start.tStart;
-	a9cap_control_end.tStart = a9cap_touch_start.tStart;
-	a9cap_inverse_start.tStart = a9cap_touch_start.tStart;
-	a9cap_inverse_end.tStart = a9cap_touch_start.tStart;
-	a9cap_servo_start.tStart = a9cap_touch_start.tStart;
-	
-        a9cap_cycle_time.tStart = a9cap_touch_start.tStart;
-
         nanosleep(&tim , NULL);
     }
 }

@@ -26,7 +26,6 @@ THREAD_ENTRY()
 	while (1)
 	{		
 		uint32_t addr = MBOX_GET(video_cmd);
-		start = clock();
 
 			
 
@@ -36,9 +35,7 @@ THREAD_ENTRY()
 			MEM_WRITE(ram, img_msg_data+ HDMI_INPUT_WIDTH*i*PIXEL_BYTE,  	HDMI_INPUT_WIDTH*PIXEL_BYTE);
 		}
 
-		end = clock();
 		ROS_PUBLISH(video_pubdata, video_image_msg_out);
-		printf("%3.6f\n", (double)(end-start)/CLOCKS_PER_SEC);
 	}
 
 }
