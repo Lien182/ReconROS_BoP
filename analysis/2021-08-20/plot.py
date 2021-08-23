@@ -46,13 +46,15 @@ for i in range(0,3):
     axs[0,i].plot(cycletimes[:,i])
     axs[0,i].set_xlim(0, cycletimes[:,i].size)
     axs[0,i].set_xlabel('Sample')
-    axs[0,i].set_ylabel('Starttime')
+    axs[0,i].set_ylabel('Cycletime')
     axs[0,i].grid(True)
 
-    axs[1,i].plot(timestamps[:,i])
-    axs[1,i].set_xlim(0, timestamps[:,i].size)
-    axs[1,i].set_xlabel('Sample')
-    axs[1,i].set_ylabel('Cycletime')
+    axs[1,i].hist(cycletimes[:,i], bins=np.arange(20, step=0.5))
+
+    # axs[1,i].plot(timestamps[:,i])
+    axs[1,i].set_xlim(0, 20)
+    axs[1,i].set_xlabel('Cycletime')
+    axs[1,i].set_ylabel('Frequency')
     axs[1,i].grid(True)
 
 
