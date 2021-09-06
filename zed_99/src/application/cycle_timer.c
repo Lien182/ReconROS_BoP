@@ -19,6 +19,7 @@
 
 void * cycle_timer_thread(void* arg)
 {
+    uint32_t cnt = 0;
     t_cycle_timer * cycle_timer;
     cycle_timer = (t_cycle_timer*)arg;
 
@@ -63,13 +64,18 @@ void * cycle_timer_thread(void* arg)
 	a9cap_demonstrator_cycle_time[0].tStop = diff_measurement->CAP3;
         a9cap_demonstrator_cycle_time[1].tStop = diff_measurement->CAP4;
         a9cap_demonstrator_cycle_time[2].tStop = diff_measurement->CAP5;
-        		
-	printf("[CYCLE TIMER] %u;%f;%u;%f;%u;%f;\n",  a9cap_demonstrator_cycle_time[0].tStart,
-                                                        (float)(a9cap_demonstrator_cycle_time[0].tStop - a9cap_demonstrator_cycle_time[0].tStart) *  0.00001f,
-                                                        a9cap_demonstrator_cycle_time[1].tStart,
-                                                        (float)(a9cap_demonstrator_cycle_time[1].tStop - a9cap_demonstrator_cycle_time[1].tStart) *  0.00001f,
-                                                        a9cap_demonstrator_cycle_time[2].tStart,
-                                                        (float)(a9cap_demonstrator_cycle_time[2].tStop - a9cap_demonstrator_cycle_time[2].tStart) *  0.00001f );
+
+        if(cnt < 2000)
+        {
+                cnt++;
+                printf("[CYCLE TIMER] %u;%f;%u;%f;%u;%f;\n",  a9cap_demonstrator_cycle_time[0].tStart,
+                                                (float)(a9cap_demonstrator_cycle_time[0].tStop - a9cap_demonstrator_cycle_time[0].tStart) *  0.00001f,
+                                                a9cap_demonstrator_cycle_time[1].tStart,
+                                                (float)(a9cap_demonstrator_cycle_time[1].tStop - a9cap_demonstrator_cycle_time[1].tStart) *  0.00001f,
+                                                a9cap_demonstrator_cycle_time[2].tStart,
+                                                (float)(a9cap_demonstrator_cycle_time[2].tStop - a9cap_demonstrator_cycle_time[2].tStart) *  0.00001f );
+        }		
+
 	
 
 
